@@ -1,0 +1,10 @@
+name: astroglial_analysis
+
+channels:
+  - default
+  - conda-forge
+  - bioconda
+
+
+dependencies:
+  - python = 3.9.18

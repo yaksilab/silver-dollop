@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "astroglial-analysis"
+version = "0.1.0"
+description = "This project attempts to suplement some analysis alogorithims for segmented astroglial cells from zebrafish brain"
+authors = ["javidaf <javid.af@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+cellpose = "2.3.2"
+matplotlib = "^3.9.1"
+numpy = "1.26.4"
+scipy = "1.11"
+scikit-image = "^0.24.0"
+scikit-learn = "^1.5.1"
+pandas = "^2.2.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
