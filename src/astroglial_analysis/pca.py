@@ -12,6 +12,7 @@ def get_pcs(region_coords):
     pc = pca.components_[0]
     eigenvalue = pca.explained_variance_[0]
     covariance = pca.get_covariance()[0][1]
+    pc = get_variance_direction(pc, covariance)
     pc_denormalized = pc * scalar.scale_
     original_variance = np.var(region_coords, axis=0, ddof=1).mean()
     eigenvalue_denormalized = eigenvalue * original_variance
