@@ -1,7 +1,5 @@
 # silver-dollop
 This repo contains analysis tools for astroglial cells 
-# astroglialAnalysis
-This project contains some astroglial analysis tools
 
 # Data structure for sub segmentation
 
