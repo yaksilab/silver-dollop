@@ -16,7 +16,7 @@ This project is managed by Poetry, but you can also set it up using Anaconda. Fo
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/yourusername/silver-dollop.git
+    git clone https://github.com/yaksilab/silver-dollop.git
     cd silver-dollop
     ```
 
