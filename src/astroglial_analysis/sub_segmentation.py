@@ -7,15 +7,11 @@ from sklearn.decomposition import PCA
 
 
 def subsegment_region(region_coords, segment_length):
-    # Get the principal component
+    # Get the denormalized principal component
     pc, eigenvalue, covar = get_pcs(region_coords)
-    # mean = np.mean(region_coords, axis=0)
-    # plot_pcs(pc, eigenvalue, covar, mean)
 
-    # Project the region coordinates onto the principal component
-    scalar = StandardScaler()
-    region_coords_normalized = scalar.fit_transform(region_coords)
-    projections = np.dot(region_coords_normalized, pc)
+    # Project the original region coordinates onto the principal component
+    projections = np.dot(region_coords, pc)
 
     # Determine the number of segments
     min_proj, max_proj = projections.min(), projections.max()

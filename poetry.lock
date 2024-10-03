@@ -110,6 +110,26 @@ doc = ["doc8", "sphinx (>=7.0.0)", "sphinx-autobuild", "sphinx-autodoc-typehints
 test = ["dateparser (==1.*)", "pre-commit", "pytest", "pytest-cov", "pytest-mock", "pytz (==2021.1)", "simplejson (==3.*)"]
 
 [[package]]
+name = "astroglial-segmentation"
+version = "1.1.0"
+description = "doing cell detection and segmentation of radial glial of zebra fish brain cells"
+optional = false
+python-versions = ">=3.9,<3.13"
+files = []
+develop = false
+
+[package.dependencies]
+cellpose = "2.3.2"
+matplotlib = "^3.8.2"
+numpy = "^1.26.2"
+opencv-python = "^4.8.1.78"
+suite2p = "0.14.3"
+
+[package.source]
+type = "directory"
+url = "../Astrolglial-cell-segmentation"
+
+[[package]]
 name = "asttokens"
 version = "2.4.1"
 description = "Annotate AST trees with source code positions"
@@ -2794,6 +2814,28 @@ files = [
 cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
+name = "rastermap"
+version = "0.9.5"
+description = "Unsupervised clustering algorithm for 2D data (neurons by time)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "rastermap-0.9.5-py3-none-any.whl", hash = "sha256:f945e2910e2a70a0c548583b88452ee9813b4ae2561fd843bf8b9fd540ef3368"},
+    {file = "rastermap-0.9.5.tar.gz", hash = "sha256:eab82bec2af69d8b5a333d9c9fb75e22f591c9b3189b2b3361dec4e8bef0e1cf"},
+]
+
+[package.dependencies]
+natsort = "*"
+numba = ">=0.57.0"
+numpy = ">=1.24.0"
+scikit-learn = "*"
+scipy = "*"
+tqdm = "*"
+
+[package.extras]
+gui = ["pyqt6", "pyqt6.sip", "pyqtgraph (>=0.11.0rc0)", "qtpy", "superqt"]
+
+[[package]]
 name = "referencing"
 version = "0.35.1"
 description = "JSON Referencing + Python"
@@ -2982,6 +3024,21 @@ files = [
     {file = "rpds_py-0.20.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:fdfc3a892927458d98f3d55428ae46b921d1f7543b89382fdb483f5640daaec8"},
     {file = "rpds_py-0.20.0.tar.gz", hash = "sha256:d72a210824facfdaf8768cf2d7ca25a042c30320b3020de2fa04640920d4e121"},
 ]
+
+[[package]]
+name = "scanimage-tiff-reader"
+version = "1.4.1.4"
+description = "A fast (big)tiff reader that provides access to ScanImage-specific metadata."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "scanimage-tiff-reader-1.4.1.4.tar.gz", hash = "sha256:dec8a4326541200e65efa2102c10b6ada5a7ad8bbead3a395a32dc2ea01e274e"},
+    {file = "scanimage_tiff_reader-1.4.1.4-cp310-cp310-win_amd64.whl", hash = "sha256:ca5874774809f14b2831dffbac8f541d6f5465e926375a259821c500bb69f6b6"},
+    {file = "scanimage_tiff_reader-1.4.1.4-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:568755ab2809a3c7a0d94ae41f209a9f116a99c5e7d1af257065725a2050262c"},
+]
+
+[package.dependencies]
+numpy = "*"
 
 [[package]]
 name = "scikit-image"
@@ -3205,6 +3262,39 @@ pure-eval = "*"
 
 [package.extras]
 tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
+
+[[package]]
+name = "suite2p"
+version = "0.14.3"
+description = "Pipeline for calcium imaging"
+optional = false
+python-versions = "*"
+files = [
+    {file = "suite2p-0.14.3-py3-none-any.whl", hash = "sha256:a3a7a7b15d679eade5af6771733d8dcc209d3f48f4c0a0f92e2a3bf76a2baa33"},
+    {file = "suite2p-0.14.3.tar.gz", hash = "sha256:3f9581987bb9a3fd50998e2ad23bcfff67c1b582ae2c495026e27be98a2b3a5d"},
+]
+
+[package.dependencies]
+cellpose = "*"
+importlib-metadata = "*"
+matplotlib = "*"
+natsort = "*"
+numba = ">=0.57.0"
+numpy = ">=1.24.3"
+rastermap = ">=0.9.0"
+scanimage-tiff-reader = ">=1.4.1"
+scikit-learn = "*"
+scipy = ">=1.9.0"
+tifffile = "*"
+torch = ">=1.13.1"
+
+[package.extras]
+all = ["h5py", "nd2", "opencv-python-headless", "paramiko", "pynwb (>=2.3.2)", "pyqt6", "pyqt6.sip", "pyqtgraph", "pytest", "pytest-qt (>3.3.0)", "qtpy", "sbxreader", "tenacity", "tqdm"]
+docs = ["sphinx (>=3.0)", "sphinx-autodoc-typehints", "sphinx-prompt", "sphinx-rtd-theme", "sphinxcontrib-apidoc"]
+gui = ["pyqt6", "pyqt6.sip", "pyqtgraph", "qtpy"]
+io = ["h5py", "nd2", "opencv-python-headless", "paramiko", "sbxreader"]
+nwb = ["pynwb (>=2.3.2)"]
+tests = ["pynwb (>=2.3.2)", "pytest", "pytest-qt (>3.3.0)", "tenacity", "tqdm"]
 
 [[package]]
 name = "sympy"
@@ -3575,4 +3665,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "c734f3854197e1bfac23612ea876ab9517127bacf1f45fec30ea417b8d38f365"
+content-hash = "cd646fef60311b548151215a70d7e7ba56c434706eb9b38ea044e33500272c44"

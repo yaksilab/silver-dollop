@@ -34,7 +34,11 @@ def rotate_region(pc, region_coords, up: bool):
     return rotated_coords + rotation_point
 
 
-def get_formated_region_coords(region_coords):
-    region_coords = np.transpose(region_coords)
-    region_coords = np.flip(region_coords, axis=1)
+def get_formated_region_coords(region_coords, revert=False):
+    if revert:
+        region_coords = np.flip(region_coords, axis=1)
+        region_coords = np.transpose(region_coords)
+    else:
+        region_coords = np.transpose(region_coords)
+        region_coords = np.flip(region_coords, axis=1)
     return region_coords
