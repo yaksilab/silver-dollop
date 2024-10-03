@@ -111,7 +111,7 @@ test = ["dateparser (==1.*)", "pre-commit", "pytest", "pytest-cov", "pytest-mock
 
 [[package]]
 name = "astroglial-segmentation"
-version = "1.1.0"
+version = "1.1.2"
 description = "doing cell detection and segmentation of radial glial of zebra fish brain cells"
 optional = false
 python-versions = ">=3.9,<3.13"
@@ -126,8 +126,10 @@ opencv-python = "^4.8.1.78"
 suite2p = "0.14.3"
 
 [package.source]
-type = "directory"
-url = "../Astrolglial-cell-segmentation"
+type = "git"
+url = "https://github.com/yaksilab/Astrolglial-cell-segmentation.git"
+reference = "v1.1.2"
+resolved_reference = "43481a039ce72fe43b041ef5c2d241e3b1bb748f"
 
 [[package]]
 name = "asttokens"
@@ -3665,4 +3667,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "cd646fef60311b548151215a70d7e7ba56c434706eb9b38ea044e33500272c44"
+content-hash = "2071583093ad1619dca9a4612053899365984fe0f3b5ca052dcef6f3b9e1523e"
