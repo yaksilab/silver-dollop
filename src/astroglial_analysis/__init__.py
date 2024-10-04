@@ -19,3 +19,5 @@ from .determine_line import (
 )
 
 from .my_types import Region
+
+from .main import main
