@@ -20,6 +20,3 @@ astroglial-segmentation = { git = "https://github.com/yaksilab/Astrolglial-cell-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-export-requirements = "poetry export -f requirements.txt --output requirements.txt"
