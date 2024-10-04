@@ -34,7 +34,7 @@ def main(working_directory):
     subsegmented_masks_seg_path = os.path.join(
         working_directory, "subsegmented_masks_seg.npy"
     )
-    # create_suite2p_masks_extract_traces(working_directory, subsegmented_masks_seg_path)
+    create_suite2p_masks_extract_traces(working_directory, subsegmented_masks_seg_path)
 
 
 if __name__ == "__main__":
