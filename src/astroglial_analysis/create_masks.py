@@ -14,14 +14,14 @@ upper, lower = body_and_processes["upper"], body_and_processes["lower"]
 
 
 def create_subsegmented_mask(
-    masks: np.ndarray, upper: list[int], lower: list[int], segment_length: int
+    masks: np.ndarray, labels: list[int], segment_length: int
 ) -> tuple[np.ndarray, dict[int, dict[int, np.ndarray]]]:
     new_masks = np.zeros_like(masks)
     largest_label = np.max(masks)
     print(f"Largest label: {largest_label}")
     current_label = largest_label + 1
     coords = {}
-    for region_label in upper + lower:
+    for region_label in labels:
         region = np.where(masks == region_label)
         region_coords = get_formated_region_coords(region)
         subsegments = subsegment_region(region_coords, segment_length)
@@ -37,17 +37,17 @@ def create_subsegmented_mask(
     return new_masks, coords
 
 
-# Create the new mask array
-segment_length = 10
-new_masks, coords = create_subsegmented_mask(masks, upper, lower, segment_length)
-new_maskfile.item()["masks"] = new_masks
+# # Create the new mask array
+# segment_length = 10
+# new_masks, coords = create_subsegmented_mask(masks, upper, lower, segment_length)
+# new_maskfile.item()["masks"] = new_masks
 
-print(coords.keys())
-# print(coords[upper[0]].keys())
-# print(coords[upper[0]][list(coords[upper[0]].keys())[2]].shape)
-print(coords[1][269])
+# print(coords.keys())
+# # print(coords[upper[0]].keys())
+# # print(coords[upper[0]][list(coords[upper[0]].keys())[2]].shape)
+# print(coords[1][269])
 
-# # Save the new mask array to a .npy file
-# output_path = r"tests\data\subsegmented_masks.npy"
-# np.save(output_path, new_maskfile)
-# print(f"New mask array saved to {output_path}")
+# # # Save the new mask array to a .npy file
+# # output_path = r"tests\data\subsegmented_masks.npy"
+# # np.save(output_path, new_maskfile)
+# # print(f"New mask array saved to {output_path}")

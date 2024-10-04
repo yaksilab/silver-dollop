@@ -38,7 +38,6 @@ def custom_insertion_sort_line(line, x_threshold, y_threshold):
 
 def get_cellbody_center(region: Region, upper: bool, body_size: int = 150):
     pc, eigenvalue, covar = get_pcs(region)
-    # region = np.flip(region, axis=1)
     rotated_region = rotate_region(pc, region, upper)
 
     if upper:
@@ -91,9 +90,9 @@ def remove_outliers(line, coefficients, threshold=2):
     return line[~outliers], line[outliers]
 
 
-def best_fit_polynomial(line):
+def best_fit_polynomial(line, r_threshold=0.90):
     # Set the range of degrees to try
-    degrees = range(1, 11)
+    degrees = range(1, 10)
     r_scores = []
     mses = []
     best_degree = 0
@@ -118,7 +117,7 @@ def best_fit_polynomial(line):
         mses.append(mse)
 
         # Check if this is the best degree
-        if r_score > best_r_score and mse < best_mse and r_score < 0.90:
+        if r_score > best_r_score and mse < best_mse and r_score < r_threshold:
             best_r_score = r_score
             best_mse = mse
             best_degree = degree
