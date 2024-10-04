@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pca import get_pcs, get_variance_direction
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+from .pca import get_pcs
 
 
 def subsegment_region(region_coords, segment_length):

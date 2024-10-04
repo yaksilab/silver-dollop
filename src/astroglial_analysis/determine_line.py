@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import get_formated_region_coords, rotate_region
-from pca import get_pcs
+from .utils import get_formated_region_coords, rotate_region
+from .pca import get_pcs
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 
@@ -154,7 +154,3 @@ def align_regions(cleaned_line_label: list, masks, upper: bool):
 
         # print(f"Distance {i}: ", distance, x_distance)
     return aligned_regions
-
-
-if __name__ == "__main__":
-    pass

@@ -1,16 +1,16 @@
 import numpy as np
-from utils import get_formated_region_coords
-from sub_segmentation import subsegment_region
-from classifier2 import classify_masks
+from .utils import get_formated_region_coords
+from .sub_segmentation import subsegment_region
+from .classifier2 import classify_masks
 
-# Load the masks
-p0 = r"tests\data\combined_mean_image1_seg.npy"
-masks = np.load(p0, allow_pickle=True).item()["masks"]
-mask_file = np.load(p0, allow_pickle=True)
-new_maskfile = mask_file.copy()
-# Classify the masks
-classifications, body, processes, body_and_processes = classify_masks(masks)
-upper, lower = body_and_processes["upper"], body_and_processes["lower"]
+# # Load the masks
+# p0 = r"tests\data\combined_mean_image1_seg.npy"
+# masks = np.load(p0, allow_pickle=True).item()["masks"]
+# mask_file = np.load(p0, allow_pickle=True)
+# new_maskfile = mask_file.copy()
+# # Classify the masks
+# classifications, body, processes, body_and_processes = classify_masks(masks)
+# upper, lower = body_and_processes["upper"], body_and_processes["lower"]
 
 
 def create_subsegmented_mask(

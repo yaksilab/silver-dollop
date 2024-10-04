@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from pca import get_variance_direction
-from determine_line import get_formated_region_coords
+from .pca import get_variance_direction
+from .determine_line import get_formated_region_coords
 
 
 def plot_pcs(pc, eigenvalue, covar, start):

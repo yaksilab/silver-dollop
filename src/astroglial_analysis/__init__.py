@@ -11,7 +11,6 @@ from .sub_segmentation import (
 )
 from .determine_line import (
     get_cellbody_center,
-    devide_upper_lower,
     get_line,
     remove_outliers,
     best_fit_polynomial,
@@ -20,4 +19,4 @@ from .determine_line import (
 
 from .my_types import Region
 
-from .main import main
+from .__main__ import main

@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.measure import regionprops, label
 import cv2
-from determine_line import get_cellbody_center
-from my_types import Region
+from .determine_line import get_cellbody_center
+from .my_types import Region
 
 
 def label_region(region: Region) -> float:

@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import get_formated_region_coords
+from .utils import get_formated_region_coords
 
 
 def sort_regions_by_centroid_and_xy_position(region_labels, mask_array):
