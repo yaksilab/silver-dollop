@@ -11,6 +11,7 @@ This repo contains analysis tools for astroglial cells
     - [Quick setup](#quick-setup)
     - [Local source code clone setup and package installation](#local-source-code-clone-setup-and-package-installation)
   - [Usage](#usage)
+- [Overview](#overview)
 
 # Getting Started
 
@@ -100,6 +101,8 @@ Run the main script with the following command:
 
     main('<path to your data folder>')
     ```
+# Overview
+![image](https://github.com/user-attachments/assets/ee8463f6-35a9-428c-a13b-e9ebfe2941b1)
 
 
 
