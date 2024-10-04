@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import get_formated_region_coords
-from pca import get_pcs, get_variance_direction
 
 
 def sort_regions_by_centroid_and_xy_position(region_labels, mask_array):

@@ -1,7 +1,6 @@
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-
 masks = np.load(
     r"C:\YaksiData\astrolglialAnalysis\tests\data\combined_mean_image_seg.npy",
     allow_pickle=True,

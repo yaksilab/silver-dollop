@@ -1,15 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from utils import get_formated_region_coords, rotate_region
-from pca import get_pcs, get_variance_direction
-from projection import upper_lower
+from pca import get_pcs
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
-from sub_segmentation import (
-    subsegment_region,
-    visualize_subsegments,
-    subsegment_region_y_axis,
-)
 
 Region = np.ndarray[int]
 

@@ -1,11 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
 from utils import get_formated_region_coords
-from classifier import classify_masks
 from pca import get_pcs, get_variance_direction
 from projection import upper_lower
-from plot import plot_pcs
 
 
 p0 = r"tests\data\combined_mean_image1_seg.npy"

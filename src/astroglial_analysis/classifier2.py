@@ -1,11 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.measure import regionprops, label
-from skimage.draw import rectangle
-from utils import rotate_region
-from pca import get_pcs, get_variance_direction
 import cv2
-from determine_line import get_formated_region_coords, get_line, get_cellbody_center
+from determine_line import get_cellbody_center
 from my_types import Region
 
 
