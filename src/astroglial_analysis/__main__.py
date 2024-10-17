@@ -1,9 +1,11 @@
+import argparse
+import os
+
+import numpy as np
+from astroglial_segmentation import create_suite2p_masks_extract_traces
+
 from .classifier2 import classify_masks
 from .create_masks import create_subsegmented_mask
-from astroglial_segmentation import create_suite2p_masks_extract_traces
-import numpy as np
-import os
-import argparse
 
 
 def main(working_directory):

@@ -21,6 +21,7 @@ def create_subsegmented_mask(
     print(f"Largest label: {largest_label}")
     current_label = largest_label + 1
     coords = {}
+    relations = {}
     for region_label in labels:
         region = np.where(masks == region_label)
         region_coords = get_formated_region_coords(region)
@@ -32,9 +33,11 @@ def create_subsegmented_mask(
 
             original_coord = get_formated_region_coords(subsegment, revert=True)
             new_masks[original_coord[0], original_coord[1]] = current_label
+            relations[region_label].append(current_label)
             current_label += 1
+
         coords[region_label] = sub_seg
-    return new_masks, coords
+    return new_masks, coords, relations
 
 
 # # Create the new mask array
