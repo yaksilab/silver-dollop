@@ -73,10 +73,13 @@ def calculate_elongation_center_of_mass(masks):
 def classify_masks(masks, body_size=200):
     classifications = []
     features = calculate_elongation_center_of_mass(masks)
+    mask_shape = masks.shape  # (y,x)
 
     body = []
     processes = []
-    body_and_processes = {"upper": [], "lower": []}
+    complete_cell = {"upper": [], "lower": []}
+    means_upper = []
+    means_lower = []
 
     for elongation, center_shift, mask, shift_direction, region, cov in features:
         # Define thresholds for classification
@@ -108,7 +111,8 @@ def classify_masks(masks, body_size=200):
                     classification = 2
                 else:
                     classification = 3
-                    body_and_processes["upper"].append(region.label)
+                    complete_cell["upper"].append(region.label)
+                    means_upper.append(np.mean(coords, axis=0))
 
             elif (cov < 0 and shift_direction[0] > 0) or (
                 cov > 0 and shift_direction[0] > 0
@@ -122,7 +126,8 @@ def classify_masks(masks, body_size=200):
                     classification = 2
                 else:
                     classification = 3
-                    body_and_processes["lower"].append(region.label)
+                    complete_cell["lower"].append(region.label)
+                    means_lower.append(np.mean(coords, axis=0))
             else:
                 print(
                     "cannot classify region: ",
@@ -135,7 +140,35 @@ def classify_masks(masks, body_size=200):
 
         classifications.append((classification, region.label))
 
-    return classifications, body, processes, body_and_processes
+    # Reclassification Step upper and lower
+    if means_upper or means_lower:
+
+        mean_upper = np.mean(means_upper, axis=0)
+        mean_lower = np.mean(means_lower, axis=0)
+        total_mean = (mean_upper + mean_lower) / 2
+
+        
+        reclassified_upper = []
+        reclassified_lower = []
+
+        # Reclassify lower cells
+        for label, mean in zip(complete_cell["lower"], means_lower):
+            if mean[1] > total_mean[1] * 1.2:  # Comparing y-coordinate
+                reclassified_upper.append(label)
+            else:
+                reclassified_lower.append(label)
+
+        # Reclassify upper cells
+        for label, mean in zip(complete_cell["upper"], means_upper):
+            if mean[1] < total_mean[1] * 0.8:  # Comparing y-coordinate
+                reclassified_lower.append(label)
+            else:
+                reclassified_upper.append(label)
+
+        complete_cell["upper"] = reclassified_upper
+        complete_cell["lower"] = reclassified_lower
+
+    return classifications, body, processes, complete_cell
 
 
 def visualize_classifications(masks, classifications):

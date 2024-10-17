@@ -44,13 +44,14 @@ def get_cellbody_center(region: Region, upper: bool, body_size: int = 150):
     return np.mean(body, axis=0), body
 
 
-def get_line(region_labels, mask_array, upper: bool):
+def get_line(region_labels, mask_array, upper: bool, delta_x: float = 10):
     """
     Determines and returns a sorted line of region labels based on their x-axis values.
     Args:
         region_labels (list): A list of region labels to be processed.
         mask_array (numpy.ndarray): a labeled mask array.
         upper (bool): A boolean flag indicating whether to consider the upper part of the region.
+        delta_x (float): The threshold for considering regions as close on the x-axis.
     Returns:
         tuple: A tuple containing:
             - line (list): A list of tuples where each tuple is ((x,y), region_label).
@@ -67,9 +68,37 @@ def get_line(region_labels, mask_array, upper: bool):
         )  # Append x-axis value instead of entire body
         body.append(bod)
 
+    # initial sort
     line.sort(key=lambda x: x[0][0])  # Sort the line based on x-axis value
 
-    return line, body
+    # Group together regions that are close to each other on the x-axis
+    # TODO: Maybe better to group based on total distance rather then just x-axis
+    sorted_line = []
+    current_group = []
+    group_start_x = None
+
+    for item in line:
+        x, y = item[0]
+        if not current_group:
+            current_group.append(item)
+            group_start_x = x
+        elif abs(x - group_start_x) <= delta_x:
+            current_group.append(item)
+        else:
+            # Sort the current group by y-axis before adding to sorted_line
+            current_group.sort(
+                key=lambda item: item[0][1], reverse=upper 
+            )  # Descending y
+            sorted_line.extend(current_group)
+            # Start a new group
+            current_group = [item]
+            group_start_x = x
+
+    if current_group:
+        current_group.sort(key=lambda item: item[0][1], reverse=upper)  # Ascending y
+        sorted_line.extend(current_group)
+
+    return sorted_line, body
 
 
 def remove_outliers(line, coefficients, threshold=2):
@@ -151,6 +180,18 @@ def align_regions(cleaned_line_label: list, masks, upper: bool):
         x_distance = cleaned_line_label[i + 1][0][0] - cleaned_line_label[i][0][0]
 
         distance_shift += distance - x_distance
+    last_region = np.where(masks == cleaned_line_label[-1][1])
+    last_region = get_formated_region_coords(last_region)
+    pc, eigenvalue, covar = get_pcs(last_region)
+    last_region = rotate_region(pc, last_region, upper)
+    if upper:
+        min_y1 = np.min(last_region[:, 1])
+        last_region[:, 1] -= int(min_y1)
+    else:
+        max_y1 = np.max(last_region[:, 1])
+        last_region[:, 1] -= int(max_y1)
+    last_region[:, 0] += distance_shift
+    aligned_regions.append(last_region)
 
-        # print(f"Distance {i}: ", distance, x_distance)
+    # print(f"Distance {i}: ", distance, x_distance)
     return aligned_regions
