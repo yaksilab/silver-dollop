@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "astroglial-analysis"
-version = "0.1.1"
+version = "0.2.0a0"
 description = "This project attempts to suplement some analysis alogorithims for segmented astroglial cells from zebrafish brain"
 authors = ["javidaf <javid.af@outlook.com>"]
 readme = "README.md"

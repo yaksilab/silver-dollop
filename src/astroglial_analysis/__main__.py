@@ -18,13 +18,13 @@ def main(working_directory):
     masks = mask_file.item()["masks"]
 
     # Classify the masks
-    classifications, body, processes, body_and_processes = classify_masks(masks)
+    _, _, processes, body_and_processes = classify_masks(masks)
     upper, lower = body_and_processes["upper"], body_and_processes["lower"]
     labels = upper + lower + processes
 
     # Create the new mask array
     segment_length = 10
-    new_masks, coords = create_subsegmented_mask(masks, labels, segment_length)
+    new_masks, _, _ = create_subsegmented_mask(masks, labels, segment_length)
     new_maskfile.item()["masks"] = new_masks
 
     # Save the new mask array to a .npy file
