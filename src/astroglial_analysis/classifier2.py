@@ -4,6 +4,15 @@ from skimage.measure import regionprops, label
 import cv2
 from .determine_line import get_cellbody_center
 from .my_types import Region
+from astroglial_analysis.pca import get_pcs
+
+
+def get_ab(coords):
+    pc, _, _ = get_pcs(coords)
+    mean = np.mean(coords, axis=0)
+    a = pc[1] / pc[0]
+    b = mean[1] - a * mean[0]
+    return a, b, mean
 
 
 def label_region(region: Region) -> float:
@@ -81,6 +90,9 @@ def classify_masks(masks, body_size=200):
     means_upper = []
     means_lower = []
 
+    process_means = []
+    process_labels = []
+
     for elongation, center_shift, mask, shift_direction, region, cov in features:
         # Define thresholds for classification
         elongation_threshold = 0.85
@@ -89,6 +101,7 @@ def classify_masks(masks, body_size=200):
         classification = None
         coords = region.coords  # This in (y,x) format
         coords = np.flip(coords, axis=1)  # This is now in (x,y) format
+        ab = get_ab(coords)
 
         if elongation < elongation_threshold:
             classification = 1
@@ -97,18 +110,21 @@ def classify_masks(masks, body_size=200):
             classification = 2
             processes.append(region.label)
 
+            process_means.append(np.mean(coords, axis=0))
+            process_labels.append(region.label)
         else:
-
             if (cov >= 0 and shift_direction[0] <= 0) or (
                 cov < 0 and shift_direction[0] < 0
             ):
                 center, bod = get_cellbody_center(coords, True, body_size)
-
                 elong = label_region(bod)
 
                 if elong.eccentricity > elong_thresh:
                     processes.append(region.label)
                     classification = 2
+
+                    process_means.append(np.mean(coords, axis=0))
+                    process_labels.append(region.label)
                 else:
                     classification = 3
                     complete_cell["upper"].append(region.label)
@@ -117,13 +133,15 @@ def classify_masks(masks, body_size=200):
             elif (cov < 0 and shift_direction[0] > 0) or (
                 cov > 0 and shift_direction[0] > 0
             ):
-
                 center, bod = get_cellbody_center(coords, False, body_size)
                 elong = label_region(bod)
 
                 if elong.eccentricity > elong_thresh:
                     processes.append(region.label)
                     classification = 2
+
+                    process_means.append(np.mean(coords, axis=0))
+                    process_labels.append(region.label)
                 else:
                     classification = 3
                     complete_cell["lower"].append(region.label)
@@ -140,14 +158,12 @@ def classify_masks(masks, body_size=200):
 
         classifications.append((classification, region.label))
 
-    # Reclassification Step upper and lower
+    # Reclassification Step for complete_cell and processes
     if means_upper or means_lower:
-
         mean_upper = np.mean(means_upper, axis=0)
         mean_lower = np.mean(means_lower, axis=0)
         total_mean = (mean_upper + mean_lower) / 2
 
-        
         reclassified_upper = []
         reclassified_lower = []
 
@@ -167,6 +183,38 @@ def classify_masks(masks, body_size=200):
 
         complete_cell["upper"] = reclassified_upper
         complete_cell["lower"] = reclassified_lower
+
+    # Reclassify Processes into Upper and Lower
+    processes_upper = []
+    processes_lower = []
+
+    if process_means:
+        # Calculate the overall total mean y-coordinate
+        if means_upper and means_lower:
+            mean_upper = np.mean(means_upper, axis=0)
+            mean_lower = np.mean(means_lower, axis=0)
+            total_mean = (mean_upper + mean_lower) / 2
+            total_mean_y = total_mean[1]
+        else:
+
+            total_mean_y = np.mean([mean[1] for mean in process_means])
+
+        for label, mean in zip(process_labels, process_means):
+            if mean[1] > total_mean_y * 1.1:
+                processes_upper.append(label)
+
+            elif mean[1] < total_mean_y * 0.9:
+                processes_lower.append(label)
+            else:
+
+                if mean[1] >= total_mean_y:
+                    processes_upper.append(label)
+                else:
+                    processes_lower.append(label)
+
+    processes = {"upper": processes_upper, "lower": processes_lower}
+    complete_cell["processes_upper"] = processes_upper
+    complete_cell["processes_lower"] = processes_lower
 
     return classifications, body, processes, complete_cell
 
