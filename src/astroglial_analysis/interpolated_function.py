@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev
 from scipy.optimize import brentq
-from my_types import PIdentifier, Intersection, Label, IDRegion
-from utils import get_formated_region_coords, rotate_region
-from pca import get_pcs
+from astroglial_analysis.my_types import PIdentifier, Intersection, Label, IDRegion
+from astroglial_analysis.utils import get_formated_region_coords, rotate_region
+from astroglial_analysis.pca import get_pcs
 
 
 def compute_cumulative_length(points):
@@ -159,9 +159,24 @@ def get_all_intersections(
     return intersections_list
 
 
-def uniform_align_processes(intersection_list, masks, upper: bool) -> list[IDRegion]:
+def uniform_align_processes(
+    intersection_list: list[tuple[Label, Intersection, float]], masks, upper: bool
+) -> tuple[list[IDRegion], np.ndarray]:
+    """
+    Aligns the processes based on the intersection points.
+
+    Parameters:
+    - intersection_list (list): List of tuples (label, Intersection, distance) where the curve intersects the line.
+    - masks (np.ndarray): A labeled mask array.
+    - upper (bool): A boolean flag indicating whether to consider the upper part of the region.
+
+    Returns:
+    - aligned_processes (list): List of aligned processes.
+    - corresponding_matrix (np.ndarray): Corresponding matrix containing the original and aligned coordinates with the label.
+    """
 
     aligned_processes = []
+    corresponding_matrix = []
     for label, (t, x, y), d in intersection_list:
         coords = get_formated_region_coords(np.where(masks == label))
         mean = np.mean(coords, axis=0)
@@ -169,7 +184,6 @@ def uniform_align_processes(intersection_list, masks, upper: bool) -> list[IDReg
         rotated_coords = rotate_region(pc, coords, upper)
         translation = np.array([t, d]) - mean
         aligned_coords = rotated_coords + translation
-        aligned_processes.append((label, aligned_coords))
 
         min_y = np.min(aligned_coords[:, 1])
         if min_y < 0:
@@ -177,7 +191,13 @@ def uniform_align_processes(intersection_list, masks, upper: bool) -> list[IDReg
 
         aligned_processes.append((label, aligned_coords))
 
-    return aligned_processes
+        for orig, rot in zip(coords, aligned_coords):
+            row = np.array([label, orig[0], orig[1], rot[0], rot[1]])
+            corresponding_matrix.append(row)
+
+    corresponding_matrix = np.array(corresponding_matrix, dtype=int)
+
+    return aligned_processes, corresponding_matrix
 
 
 def plot_parametrized_curve(points, x_fit, y_fit, color, label):

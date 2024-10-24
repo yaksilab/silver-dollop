@@ -99,25 +99,28 @@ def uniform_align_comp_cell(
 ) -> list[IDRegion]:
     distance_shift = 0
     aligned_regions = []
+    corresponding_matrix = []
 
     distance_shift -= param_curve[0][0][0]
     for i in range(len(param_curve) - 1):
         label = param_curve[i][1]
-        region1 = np.where(masks == label)
-        region1 = get_formated_region_coords(region1)
-        pc, _, _ = get_pcs(region1)
+        org_coords = get_formated_region_coords(np.where(masks == label))
+        pc, _, _ = get_pcs(org_coords)
 
-        region1 = rotate_region(pc, region1, upper)
+        aligned_coords = rotate_region(pc, org_coords, upper)
         if upper:
-            min_y1 = np.min(region1[:, 1])
-            region1[:, 1] -= int(min_y1)
+            min_y1 = np.min(aligned_coords[:, 1])
+            aligned_coords[:, 1] -= int(min_y1)
         else:
-            max_y1 = np.max(region1[:, 1])
-            region1[:, 1] -= int(max_y1)
-            region1[:, 1] = -region1[:, 1]
+            max_y1 = np.max(aligned_coords[:, 1])
+            aligned_coords[:, 1] -= int(max_y1)
+            aligned_coords[:, 1] = -aligned_coords[:, 1]
 
-        region1[:, 0] += distance_shift
-        aligned_regions.append((label, region1))
+        aligned_coords[:, 0] += distance_shift
+        aligned_regions.append((label, aligned_coords))
+        for orig, rot in zip(org_coords, aligned_coords):
+            row = np.array([label, orig[0], orig[1], rot[0], rot[1]])
+            corresponding_matrix.append(row)
 
         distance = np.sqrt(
             (param_curve[i + 1][0][0] - param_curve[i][0][0]) ** 2
@@ -127,19 +130,27 @@ def uniform_align_comp_cell(
         x_distance = param_curve[i + 1][0][0] - param_curve[i][0][0]
 
         distance_shift += distance - x_distance
-    last_label = param_curve[-1][1]
-    last_region = np.where(masks == last_label)
-    last_region = get_formated_region_coords(last_region)
-    pc, _, _ = get_pcs(last_region)
-    last_region = rotate_region(pc, last_region, upper)
-    if upper:
-        min_y1 = np.min(last_region[:, 1])
-        last_region[:, 1] -= int(min_y1)
-    else:
-        max_y1 = np.max(last_region[:, 1])
-        last_region[:, 1] -= int(max_y1)
-        last_region[:, 1] = -last_region[:, 1]
-    last_region[:, 0] += distance_shift
-    aligned_regions.append((last_label, last_region))
 
-    return aligned_regions
+    last_label = param_curve[-1][1]
+    last_region_coords = np.where(masks == last_label)
+    last_region_coords = get_formated_region_coords(last_region_coords)
+    pc, _, _ = get_pcs(last_region_coords)
+    aligned_coords = rotate_region(pc, aligned_coords, upper)
+    if upper:
+        min_y1 = np.min(aligned_coords[:, 1])
+        aligned_coords[:, 1] -= int(min_y1)
+    else:
+        max_y1 = np.max(aligned_coords[:, 1])
+        aligned_coords[:, 1] -= int(max_y1)
+        aligned_coords[:, 1] = -aligned_coords[:, 1]
+    aligned_coords[:, 0] += distance_shift
+
+    for orig, rot in zip(last_region_coords, aligned_coords):
+        row = np.array([last_label, orig[0], orig[1], rot[0], rot[1]])
+        corresponding_matrix.append(row)
+
+    corresponding_matrix = np.array(corresponding_matrix, dtype=int)
+
+    aligned_regions.append((last_label, aligned_coords))
+
+    return aligned_regions, corresponding_matrix

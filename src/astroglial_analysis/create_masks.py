@@ -3,15 +3,6 @@ from .utils import get_formated_region_coords
 from .sub_segmentation import subsegment_region
 from .classifier2 import classify_masks
 
-# # Load the masks
-# p0 = r"tests\data\combined_mean_image1_seg.npy"
-# masks = np.load(p0, allow_pickle=True).item()["masks"]
-# mask_file = np.load(p0, allow_pickle=True)
-# new_maskfile = mask_file.copy()
-# # Classify the masks
-# classifications, body, processes, body_and_processes = classify_masks(masks)
-# upper, lower = body_and_processes["upper"], body_and_processes["lower"]
-
 
 def create_subsegmented_mask(
     masks: np.ndarray, labels: list[int], segment_length: int
@@ -40,17 +31,10 @@ def create_subsegmented_mask(
     return new_masks, coords, relations
 
 
-# # Create the new mask array
-# segment_length = 10
-# new_masks, coords = create_subsegmented_mask(masks, upper, lower, segment_length)
-# new_maskfile.item()["masks"] = new_masks
-
-# print(coords.keys())
-# # print(coords[upper[0]].keys())
-# # print(coords[upper[0]][list(coords[upper[0]].keys())[2]].shape)
-# print(coords[1][269])
-
-# # # Save the new mask array to a .npy file
-# # output_path = r"tests\data\subsegmented_masks.npy"
-# # np.save(output_path, new_maskfile)
-# # print(f"New mask array saved to {output_path}")
+def create_cp_mask(data_matrix: np.ndarray, masks: np.ndarray) -> np.ndarray:
+    new_masks = np.zeros_like(masks)
+    rows = data_matrix[:, 3].astype(int)
+    cols = data_matrix[:, 4].astype(int)
+    labels = data_matrix[:, 1]
+    new_masks[cols, rows] = labels
+    return new_masks

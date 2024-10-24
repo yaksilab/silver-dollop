@@ -51,25 +51,53 @@ def subsegment_region_y_axis(region_coords, segment_length):
     return subsegments
 
 
-# p0 = r"tests\data\combined_mean_image_seg.npy"
-# masks = np.load(p0, allow_pickle=True).item()["masks"]
-# labels = np.unique(masks)
-# labels = labels[labels != 0]
+def sub_segment(data_matrix, subsegment_length):
+    """
+    Adds sub_segment_label and subsegment_number to the data matrix.
 
+    Parameters:
+    - data (np.ndarray): Original data matrix with shape (N, 5).
+    - subsegment_length (int): Length of each subsegment based on y_rotated.
 
-# # Example usage
-# p0 = r"tests\data\combined_mean_image_seg.npy"
-# masks = np.load(p0, allow_pickle=True).item()["masks"]
+    Returns:
+    - new_data (np.ndarray): Updated data matrix with shape (N, 7).
+    """
 
-# classifications, body, processes, body_and_processes = classify_masks(masks)
-# upper_lower = upper_lower(body_and_processes, masks)
+    cell_labels = data_matrix[:, 0]
+    y_rotated = data_matrix[:, 4]
 
-# region = np.where(masks == upper_lower[0][0])
-# region = get_formated_region_coords(region)
+  
+    subsegment_number = (y_rotated // subsegment_length) + 1
 
+ 
+    unique_pairs = np.unique(np.column_stack((cell_labels, subsegment_number)), axis=0)
 
-# segment_length = 10
-# subsegments = subsegment_region(region, segment_length)
-# visualize_subsegments(subsegments)
-# plt.gca().invert_yaxis()
-# plt.show()
+    # Assign unique sub_segment_labels starting from max(cell_label) + 1
+    max_cell_label = cell_labels.max()
+    new_labels_start = max_cell_label + 1
+    sub_segment_label_map = {
+        (pair[0], pair[1]): new_labels_start + idx
+        for idx, pair in enumerate(unique_pairs)
+    }
+
+    # Map each row to its sub_segment_label
+    sub_segment_label = np.array(
+        [
+            sub_segment_label_map[(cl, sn)]
+            for cl, sn in zip(cell_labels, subsegment_number)
+        ]
+    )
+
+   
+    new_data = np.column_stack(
+        (
+            cell_labels,  
+            sub_segment_label,  
+            subsegment_number,  
+            data_matrix[:, 1:5],  # x_original, y_original, x_rotated, y_rotated
+        )
+    )
+
+    new_data = new_data.astype(int)
+
+    return new_data
