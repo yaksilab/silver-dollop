@@ -2,15 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .utils import get_formated_region_coords, rotate_region
 from .pca import get_pcs
-from scipy.interpolate import splprep, splev
-from scipy.integrate import quad
-from collections import defaultdict
-
-Region = np.ndarray[int]
+from .my_types import Region, ParamCurveLine, IDRegion
 
 
 def get_cellbody_center(region: Region, upper: bool, body_size: int = 150):
-    pc, eigenvalue, covar = get_pcs(region)
+    pc, _, _ = get_pcs(region)
     rotated_region = rotate_region(pc, region, upper)
 
     if upper:
@@ -25,7 +21,7 @@ def get_cellbody_center(region: Region, upper: bool, body_size: int = 150):
 
 def get_line(
     region_labels, mask_array, upper: bool, delta_x: float = 20
-) -> tuple[list, list]:
+) -> tuple[ParamCurveLine, list]:
     """
     Determines and returns a sorted line of region labels based on their x-axis values.
     Args:
@@ -35,7 +31,7 @@ def get_line(
         delta_x (float): The threshold for considering regions as close on the x-axis.
     Returns:
         tuple: A tuple containing:
-            - line (list): A list of tuples where each tuple is ((x,y), region_label).
+            - param_curve_line (ParamCurveLine)
             - body (list): A list of body coordinates for each region.
     """
     line = []
@@ -98,14 +94,16 @@ def remove_outliers(line, coefficients, threshold=2):
     return line[~outliers], line[outliers]
 
 
-def align_regions(cleaned_line_label: list, masks, upper: bool):
+def uniform_align_comp_cell(
+    param_curve: ParamCurveLine, masks, upper: bool
+) -> list[IDRegion]:
     distance_shift = 0
     aligned_regions = []
 
-    distance_shift -= cleaned_line_label[0][0][0]
-    for i in range(len(cleaned_line_label) - 1):
-
-        region1 = np.where(masks == cleaned_line_label[i][1])
+    distance_shift -= param_curve[0][0][0]
+    for i in range(len(param_curve) - 1):
+        label = param_curve[i][1]
+        region1 = np.where(masks == label)
         region1 = get_formated_region_coords(region1)
         pc, _, _ = get_pcs(region1)
 
@@ -119,20 +117,20 @@ def align_regions(cleaned_line_label: list, masks, upper: bool):
             region1[:, 1] = -region1[:, 1]
 
         region1[:, 0] += distance_shift
-        aligned_regions.append(region1)
+        aligned_regions.append((label, region1))
 
         distance = np.sqrt(
-            (cleaned_line_label[i + 1][0][0] - cleaned_line_label[i][0][0]) ** 2
-            + (cleaned_line_label[i + 1][0][1] - cleaned_line_label[i][0][1]) ** 2
+            (param_curve[i + 1][0][0] - param_curve[i][0][0]) ** 2
+            + (param_curve[i + 1][0][1] - param_curve[i][0][1]) ** 2
         )
 
-        x_distance = cleaned_line_label[i + 1][0][0] - cleaned_line_label[i][0][0]
+        x_distance = param_curve[i + 1][0][0] - param_curve[i][0][0]
 
         distance_shift += distance - x_distance
-
-    last_region = np.where(masks == cleaned_line_label[-1][1])
+    last_label = param_curve[-1][1]
+    last_region = np.where(masks == last_label)
     last_region = get_formated_region_coords(last_region)
-    pc, eigenvalue, covar = get_pcs(last_region)
+    pc, _, _ = get_pcs(last_region)
     last_region = rotate_region(pc, last_region, upper)
     if upper:
         min_y1 = np.min(last_region[:, 1])
@@ -142,6 +140,6 @@ def align_regions(cleaned_line_label: list, masks, upper: bool):
         last_region[:, 1] -= int(max_y1)
         last_region[:, 1] = -last_region[:, 1]
     last_region[:, 0] += distance_shift
-    aligned_regions.append(last_region)
+    aligned_regions.append((last_label, last_region))
 
     return aligned_regions

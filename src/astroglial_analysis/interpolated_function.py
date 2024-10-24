@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d, splrep, splev, splprep
+from scipy.interpolate import splrep, splev
 from scipy.optimize import brentq
-from my_types import PIdentifier, Intersection, Label
+from my_types import PIdentifier, Intersection, Label, IDRegion
 from utils import get_formated_region_coords, rotate_region
 from pca import get_pcs
 
@@ -57,7 +57,7 @@ def parametrize_curve(points):
     return t_values, (spline_x, spline_y), x_fit, y_fit, total_length
 
 
-def find_intersections(tck, t_interval, a, b, tol=1e-2) -> list[list[Intersection]]:
+def find_intersections(tck, t_interval, a, b, tol=1e-2) -> list[Intersection]:
     """
     Finds intersection points between the parameterized curve and the line y = ax + b.
 
@@ -108,7 +108,7 @@ def find_intersections(tck, t_interval, a, b, tol=1e-2) -> list[list[Intersectio
 
 def get_all_intersections(
     tck, t_samples, p_identifier: PIdentifier, upper: bool, tol=1e-2
-) -> list[tuple[Label, Intersection]]:
+) -> list[tuple[Label, Intersection, float]]:
     """
     Finds all intersection points between the parameterized curve defined
     by `tck` and the line y = ax + b for in an interval defined by `total_length`.
@@ -151,15 +151,15 @@ def get_all_intersections(
 
         change_sign = diff_vec[1]
         if change_sign < 0 and upper:
-            distance = -distance
+            continue
         elif change_sign > 0 and not upper:
-            distance = -distance
+            continue
 
         intersections_list.append((label, closest_inter, distance))
     return intersections_list
 
 
-def uniform_align(intersection_list, masks, upper: bool):
+def uniform_align_processes(intersection_list, masks, upper: bool) -> list[IDRegion]:
 
     aligned_processes = []
     for label, (t, x, y), d in intersection_list:
@@ -169,6 +169,12 @@ def uniform_align(intersection_list, masks, upper: bool):
         rotated_coords = rotate_region(pc, coords, upper)
         translation = np.array([t, d]) - mean
         aligned_coords = rotated_coords + translation
+        aligned_processes.append((label, aligned_coords))
+
+        min_y = np.min(aligned_coords[:, 1])
+        if min_y < 0:
+            aligned_coords[:, 1] -= min_y
+
         aligned_processes.append((label, aligned_coords))
 
     return aligned_processes
