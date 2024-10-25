@@ -128,8 +128,8 @@ suite2p = "0.14.3"
 [package.source]
 type = "git"
 url = "https://github.com/yaksilab/Astrolglial-cell-segmentation.git"
-reference = "v1.1.2"
-resolved_reference = "43481a039ce72fe43b041ef5c2d241e3b1bb748f"
+reference = "new-output-dir"
+resolved_reference = "944e88254a461e22674c383baa3f2d810bf25d3c"
 
 [[package]]
 name = "asttokens"
@@ -3667,4 +3667,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "2071583093ad1619dca9a4612053899365984fe0f3b5ca052dcef6f3b9e1523e"
+content-hash = "5ed1b7341c0f7653211e8525119b151b534a6a8922596be6765fcff77be9dbeb"
