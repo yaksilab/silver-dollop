@@ -119,7 +119,7 @@ def run_pipeline(working_directory):
         working_directory, "correspondence_matrix.mat"
     )
     save_as_mat(mapped_traces_matrix, mat_output_path_trace)
-    save_as_mat(total_cor_matrix, mat_output_path_correspondence_matrix)
+    save_as_mat(sub_segmented_data, mat_output_path_correspondence_matrix)
     # save_as_npy(mapped_traces_matrix, npy_output_path)
     # save_as_npy(total_cor_matrix, npy_output_path_correspondence_matrix)
 
