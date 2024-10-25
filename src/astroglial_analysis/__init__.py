@@ -15,3 +15,5 @@ from .my_types import *
 from .interpolated_function import *
 
 from .create_masks import *
+
+from .__main__ import run_pipeline

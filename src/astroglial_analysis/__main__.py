@@ -101,7 +101,7 @@ def run_pipeline(working_directory):
         working_directory, "subsegmented_masks_seg.npy"
     )
 
-    create_suite2p_masks_extract_traces(working_directory, subsegmented_masks_seg_path)
+    create_suite2p_masks_extract_traces(working_directory)
 
     suite2p_folder = os.path.join(working_directory, "cellpose_suite2p_output")
 
