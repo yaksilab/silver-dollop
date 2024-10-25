@@ -7,29 +7,23 @@ The output data is stored two matrices, one for trace and one aligned masks.
 	
 ```math
 \begin{bmatrix}
-C_1 & S_1 & x & y & t & d(t) & plane\# & class & f_1 & f_2 & ... & f_F \\ 
-C_1 & S_2 & x & y & t & d(t) & plane\# & class & f_1 & f_2 & ... & f_F \\
+S_1 & f_1 & f_2 & ... & f_F \\ 
+S_2 & f_1 & f_2 & ... & f_F \\
 ... \\
 ... \\
-C_2 & S_1 & x & y & t & d(t) & plane\# & class & f_1 & f_2 & ... & f_F \\
-C_2 & S_2 & x & y & t & d(t) & plane\# & class & f_1 & f_2 & ... & f_F \\
+S_3 & f_1 & f_2 & ... & f_F \\
+S_4 & f_1 & f_2 & ... & f_F \\
 ... \\
 ... \\
-C_N & S_1 & x & y & t & d(t) & plane\# & class & f_1 & f_2 & ... & f_F \\
-C_N & S_2 & x & y & t & d(t) & plane\# & class & f_1 & f_2 & ... & f_F \\
+S_5 & f_1 & f_2 & ... & f_F \\
+S_6 & f_1 & f_2 & ... & f_F \\
 ... \\
 ... \\
 \end{bmatrix}
 ```
 
 Where:
-- C: Cell ID
-- S: Segment ID
-- $(x,y)$: Center of mass  of the pixel coordinates
-- $(t,d(t))$: `t` is the variable of the parameterized curve and `d(t)` is the distance between the subsegment of a cell and the `t`
-value that the principal componente of the cell intersects the parameterized curve. So, `d(t)` is related to which subsegment number
-- plane#: z coordinate
-- class: class of the mask (1: complete cell `upper`, 2: complete cell `lower`, 3: process `upper` part, 4: process `lower`)	
+- S: Segment Label
 - $f_1, f_2, ... f_F$: trace intensity across time points or frames
 
 
@@ -37,32 +31,40 @@ value that the principal componente of the cell intersects the parameterized cur
 
 ```math
 \begin{bmatrix}
-C_1 & S_1 & (x_1,y_1) & plane\# \\
-C_1 & S_1 & (x_2,y_2) & plane\# \\
+C_1 & S_1 & S_{\#x} & x_{o1} & y_{o1} & x_{a1} & y_{a1} \\
+C_1 & S_1 & S_{\#x} & x_{o2} & y_{o2} & x_{a2} & y_{a2} \\
 ... \\
 ... \\
-C_1 & S_2 & (x_1,y_1) & plane\# \\
-C_1 & S_2 & (x_2,y_2) & plane\# \\
+C_1 & S_2 & S_{\#x} & x_{o1} & y_{o1} & x_{a1} & y_{a1} \\
+C_1 & S_2 & S_{\#x} & x_{o2} & y_{o2} & x_{a2} & y_{a2} \\
 ... \\
 ... \\
-C_2 & S_1 & (x_1,y_1) & plane\# \\
-C_2 & S_1 & (x_2,y_2) & plane\# \\
-... \\
-C_2 & S_2 & (x_1,y_1) & plane\# \\
-C_2 & S_2 & (x_2,y_2) & plane\# \\
+C_1 & S_3 & S_{\#x} & x_{o1} & y_{o1} & x_{a1} & y_{a1} \\
+C_1 & S_3 & S_{\#x} & x_{o2} & y_{o2} & x_{a2} & y_{a2} \\
 ... \\
 ... \\
+C_2 & S_4 & S_{\#x} & x_{o1} & y_{o1} & x_{a1} & y_{a1} \\
+C_2 & S_4 & S_{\#x} & x_{o2} & y_{o2} & x_{a2} & y_{a2} \\
 ... \\
-C_N & S_1 & (x_1,y_1) & plane\# \\
+... \\
+C_2 & S_5 & S_{\#x} & x_{o1} & y_{o1} & x_{a1} & y_{a1} \\
+C_2 & S_5 & S_{\#x} & x_{o2} & y_{o2} & x_{a2} & y_{a2} \\
+... \\
+... \\
+C_N & S_M & S_{\#x} & x_{o1} & y_{o1} & x_{a1} & y_{a1} \\
+C_N & S_M & S_{\#x} & x_{o2} & y_{o2} & x_{a2} & y_{a2} \\
+... \\
+
 \end{bmatrix}
 ```
 
 Where:
 
-- $C$: Cell ID
-- $S$: Segment ID
-- $(x,y)$: pixel coordinates
-- $plane\#$: z coordinate
+- C: Cell Label
+- S: Segment Label
+- $S_{\#x}$: Subsegment number
+- $(x_o, y_o)$: Orginal pixel coordinates
+- $(x_a, y_a)$: Aligned pixel coordinates
 
 
 

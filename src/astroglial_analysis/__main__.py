@@ -14,15 +14,25 @@ from .interpolated_function import (
 )
 from .determine_line import get_line, uniform_align_comp_cell
 from .sub_segmentation import sub_segment
+from scipy.io import savemat
+from astroglial_analysis.map_cellpose_suite2p import (
+    create_suite2p_cellpose_roi_mapping,
+    map_trace,
+)
 
 
-def run_pipeline(working_directory):
-    combined_mean_image_seg_path = os.path.join(
-        working_directory, "combined_mean_image_seg.npy"
-    )
-    mask_file = np.load(combined_mean_image_seg_path, allow_pickle=True)
-    new_maskfile = mask_file.copy()
-    masks = mask_file.item()["masks"]
+def save_as_mat(matrix, path):
+    savemat(path, {"matrix": matrix})
+    print(f"Matrix saved to {path} as a .mat file")
+
+
+def save_as_npy(matrix, path):
+    np.save(path, matrix)
+    print(f"Matrix saved to {path} as a .npy file")
+
+
+def get_correspondence_matrix(masks):
+
     _, _, processes, complete_cells = classify_masks(masks)
     upper_complete, lower_complete = complete_cells["upper"], complete_cells["lower"]
     upper_processes, lower_processes = processes["upper"], processes["lower"]
@@ -66,6 +76,18 @@ def run_pipeline(working_directory):
             cor_matrix_lower_p,
         ]
     )
+    return total_cor_matrix
+
+
+def run_pipeline(working_directory):
+    combined_mean_image_seg_path = os.path.join(
+        working_directory, "combined_mean_image_seg.npy"
+    )
+    mask_file = np.load(combined_mean_image_seg_path, allow_pickle=True)
+    new_maskfile = mask_file.copy()
+    masks = mask_file.item()["masks"]
+
+    total_cor_matrix = get_correspondence_matrix(masks)
 
     sub_segmented_data = sub_segment(total_cor_matrix, 10)
     subsegmented_mask = create_cp_mask(sub_segmented_data, masks)
@@ -80,6 +102,26 @@ def run_pipeline(working_directory):
     )
 
     create_suite2p_masks_extract_traces(working_directory, subsegmented_masks_seg_path)
+
+    suite2p_folder = os.path.join(working_directory, "cellpose_suite2p_output")
+
+    mapping = create_suite2p_cellpose_roi_mapping(subsegmented_mask, suite2p_folder)
+
+    traces = np.load(f"{suite2p_folder}/F.npy", allow_pickle=True)
+    mapped_traces_matrix = map_trace(traces, mapping)
+
+    npy_output_path_trace = os.path.join(working_directory, "trace_matrix.npy")
+    mat_output_path_trace = os.path.join(working_directory, "trace_matrix.mat")
+    npy_output_path_correspondence_matrix = os.path.join(
+        working_directory, "correspondence_matrix.npy"
+    )
+    mat_output_path_correspondence_matrix = os.path.join(
+        working_directory, "correspondence_matrix.mat"
+    )
+    save_as_mat(mapped_traces_matrix, mat_output_path_trace)
+    save_as_mat(total_cor_matrix, mat_output_path_correspondence_matrix)
+    # save_as_npy(mapped_traces_matrix, npy_output_path)
+    # save_as_npy(total_cor_matrix, npy_output_path_correspondence_matrix)
 
 
 if __name__ == "__main__":
