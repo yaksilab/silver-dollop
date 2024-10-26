@@ -1,7 +1,6 @@
 import numpy as np
 from .utils import get_formated_region_coords
 from .sub_segmentation import subsegment_region
-from .classifier2 import classify_masks
 
 
 def create_subsegmented_mask(
@@ -33,8 +32,8 @@ def create_subsegmented_mask(
 
 def create_cp_mask(data_matrix: np.ndarray, masks: np.ndarray) -> np.ndarray:
     new_masks = np.zeros_like(masks)
-    rows = data_matrix[:, 3].astype(int)
-    cols = data_matrix[:, 4].astype(int)
+    cols = data_matrix[:, 3].astype(int)
+    rows = data_matrix[:, 4].astype(int)
     labels = data_matrix[:, 1]
-    new_masks[cols, rows] = labels
+    new_masks[rows, cols] = labels
     return new_masks

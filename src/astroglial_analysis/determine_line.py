@@ -6,6 +6,9 @@ from .my_types import Region, ParamCurveLine, IDRegion
 
 
 def get_cellbody_center(region: Region, upper: bool, body_size: int = 150):
+    # TODO: Here we are using an estimated body size, which might not be correct for all datasets.  
+
+
     pc, _, _ = get_pcs(region)
     rotated_region = rotate_region(pc, region, upper)
 
@@ -15,15 +18,14 @@ def get_cellbody_center(region: Region, upper: bool, body_size: int = 150):
     else:
         sorted_indices = np.argsort(rotated_region[:, 1])[::-1]
         body = rotated_region[sorted_indices[:body_size]]
-    # body = rotate_region(pc, -covar, body)
     return np.mean(body, axis=0), body
 
 
 def get_line(
-    region_labels, mask_array, upper: bool, delta_x: float = 20
+    region_labels, mask_array, upper: bool, delta_x: float = 18
 ) -> tuple[ParamCurveLine, list]:
     """
-    Determines and returns a sorted line of region labels based on their x-axis values.
+    Determines and returns a sorted points based on global x and grouping based on local y.
     Args:
         region_labels (list): A list of region labels to be processed.
         mask_array (numpy.ndarray): a labeled mask array.
@@ -80,18 +82,6 @@ def get_line(
     #     sort_translted = [((x - min_x, y), label) for ((x, y), label) in sorted_line]
 
     return sorted_line, body
-
-
-def remove_outliers(line, coefficients, threshold=2):
-    y_pred = np.polyval(coefficients, line[:, 0])
-
-    residuals = line[:, 1] - y_pred
-
-    std_dev = np.std(residuals)
-
-    outliers = np.abs(residuals) > (threshold * std_dev)
-
-    return line[~outliers], line[outliers]
 
 
 def uniform_align_comp_cell(
