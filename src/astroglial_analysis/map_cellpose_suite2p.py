@@ -2,6 +2,19 @@ import numpy as np
 
 
 def create_suite2p_cellpose_roi_mapping(cellpose_masks, suite2p_folder):
+    """
+    Maps Suite2p ROIs to Cellpose labels based on overlapping masks and returns a dictionary.
+
+    Parameters:
+    cellpose_masks (numpy.ndarray): A 2D NumPy array where each pixel is labeled with a Cellpose ROI.
+    suite2p_folder (str): The path to the Suite2p output folder.
+
+    Returns:
+    dict: A dictionary where keys are Suite2p ROI labels (1-based index) \
+            and values are corresponding Cellpose labels.
+            If a Suite2p ROI does not map to any Cellpose label, the value is None.
+
+    """
 
     suite2p_stat = np.load(f"{suite2p_folder}/stat.npy", allow_pickle=True)
 
@@ -49,8 +62,7 @@ def map_trace(F, mapping):
 
     """
 
-    mapped_traces = []
-
+    mapped_traces = np.empty((0, len(F[0]) + 2), dtype=np.int16)
     for s2p_label, cp_label in mapping.items():
         s2p_idx = s2p_label - 1  # Adjust index since labels start from 1
         try:
@@ -62,9 +74,10 @@ def map_trace(F, mapping):
             continue
 
         if cp_label is not None:
-            # Prepend the Cellpose label to the trace
-            mapped_trace = [cp_label] + list(trace)
-            mapped_traces.append(mapped_trace)
+            # Prepend the Cellpose s2p roi index and cellpose label to the trace
+            mapped_trace = np.hstack((s2p_idx, cp_label, trace))
+            mapped_traces = np.vstack((mapped_traces, mapped_trace))
+
         else:
             print(f"No Cellpose mask found for Suite2p ROI {s2p_label}")
 
@@ -72,8 +85,4 @@ def map_trace(F, mapping):
         print("No traces were mapped to any Cellpose labels.")
         return np.array([])
 
-    first_element = mapped_traces[0][0]
-
-    matrix = np.array(mapped_traces, dtype=type(first_element))
-
-    return matrix
+    return mapped_traces

@@ -66,6 +66,16 @@ def get_correspondence_matrix(masks):
         intersection_list_lower, masks, False
     )
 
+    class_upper_comp = np.ones((cor_matrix_upper_comp.shape[0], 1), dtype=np.int16) * 1
+    class_lower_comp = np.ones((cor_matrix_lower_comp.shape[0], 1), dtype=np.int16) * 2
+    class_upper_p = np.ones((cor_matrix_upper_p.shape[0], 1), dtype=np.int16) * 3
+    class_lower_p = np.ones((cor_matrix_lower_p.shape[0], 1), dtype=np.int16) * 4
+
+    cor_matrix_upper_comp = np.hstack((cor_matrix_upper_comp, class_upper_comp))
+    cor_matrix_lower_comp = np.hstack((cor_matrix_lower_comp, class_lower_comp))
+    cor_matrix_upper_p = np.hstack((cor_matrix_upper_p, class_upper_p))
+    cor_matrix_lower_p = np.hstack((cor_matrix_lower_p, class_lower_p))
+
     total_cor_matrix = np.vstack(
         [
             cor_matrix_upper_comp,
@@ -73,11 +83,11 @@ def get_correspondence_matrix(masks):
             cor_matrix_upper_p,
             cor_matrix_lower_p,
         ]
-    )
+    ).astype(np.int16)
     return total_cor_matrix
 
 
-def run_pipeline(working_directory):
+def run_pipeline(working_directory, segment_length=10):
     combined_mean_image_seg_path = os.path.join(
         working_directory, "combined_mean_image_seg.npy"
     )
@@ -87,26 +97,28 @@ def run_pipeline(working_directory):
 
     total_cor_matrix = get_correspondence_matrix(masks)
 
-    sub_segmented_data = sub_segment(total_cor_matrix, 10)
+    sub_segmented_data = sub_segment(total_cor_matrix, segment_length)
     subsegmented_mask = create_cp_mask(sub_segmented_data, masks)
 
     new_maskfile.item()["masks"] = subsegmented_mask
     output_path = os.path.join(working_directory, "subsegmented_masks_seg.npy")
     np.save(output_path, new_maskfile)
-    print(f"New mask array saved to {output_path}")
+    print(f"New subsegmented mask is saved to {output_path}")
 
-    subsegmented_masks_seg_path = os.path.join(
-        working_directory, "subsegmented_masks_seg.npy"
-    )
-
+    print("Extracting Trace for subsegmented masks")
     create_suite2p_masks_extract_traces(working_directory, "subsegmented_masks_seg.npy")
 
     suite2p_folder = os.path.join(working_directory, "cellpose_suite2p_output")
 
     mapping = create_suite2p_cellpose_roi_mapping(subsegmented_mask, suite2p_folder)
+    reversed_mapping = {cp_label: s2p_idx for s2p_idx, cp_label in mapping.items()}
+    suite2p_column = np.array(
+        [reversed_mapping.get(label) for label in mapped_traces_matrix[:, 1]]
+    )
 
     traces = np.load(f"{suite2p_folder}/F.npy", allow_pickle=True)
     mapped_traces_matrix = map_trace(traces, mapping)
+    mapped_subsegmented_data = np.column_stack((suite2p_column, mapped_traces_matrix))
 
     npy_output_path_trace = os.path.join(working_directory, "trace_matrix.npy")
     mat_output_path_trace = os.path.join(working_directory, "trace_matrix.mat")
@@ -116,7 +128,8 @@ def run_pipeline(working_directory):
     mat_output_path_correspondence_matrix = os.path.join(
         working_directory, "correspondence_matrix.mat"
     )
+
     save_as_mat(mapped_traces_matrix, mat_output_path_trace)
-    save_as_mat(sub_segmented_data, mat_output_path_correspondence_matrix)
+    save_as_mat(mapped_subsegmented_data, mat_output_path_correspondence_matrix)
     # save_as_npy(mapped_traces_matrix, npy_output_path)
     # save_as_npy(total_cor_matrix, npy_output_path_correspondence_matrix)
