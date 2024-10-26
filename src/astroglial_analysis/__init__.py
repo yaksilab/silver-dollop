@@ -1,7 +1,7 @@
 from .pca import get_pcs, get_variance_direction
 from .classifier2 import *
-from .utils import rotate_region, get_formated_region_coords, rotate_region1
-from .plot import plot_pcs, plot_scatter
+from .utils import rotate_region, get_formated_region_coords
+from .plot import plot_pcs
 from .sub_segmentation import (
     subsegment_region,
     visualize_subsegments,
@@ -16,4 +16,4 @@ from .interpolated_function import *
 
 from .create_masks import *
 
-from .__main__ import run_pipeline
+from .run_pipline import run_pipeline, get_correspondence_matrix
