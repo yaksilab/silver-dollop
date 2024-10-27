@@ -66,6 +66,12 @@ Where:
 - $S_{\#x}$: Subsegment number
 - $(x_o, y_o)$: Orginal pixel coordinates
 - $(x_a, y_a)$: Aligned pixel coordinates
+- $class$: class label for the subsegment 
+    - 1: complete cell upper part
+    - 2: complete cell lower part
+    - 3: orphan process upper part
+    - 4: orphan process lower part
+
 
 
 
