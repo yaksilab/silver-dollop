@@ -6,8 +6,7 @@ from .my_types import Region, ParamCurveLine, IDRegion
 
 
 def get_cellbody_center(region: Region, upper: bool, body_size: int = 150):
-    # TODO: Here we are using an estimated body size, which might not be correct for all datasets.  
-
+    # TODO: Here we are using an estimated body size, which might not be correct for all datasets.
 
     pc, _, _ = get_pcs(region)
     rotated_region = rotate_region(pc, region, upper)
@@ -22,7 +21,7 @@ def get_cellbody_center(region: Region, upper: bool, body_size: int = 150):
 
 
 def get_line(
-    region_labels, mask_array, upper: bool, delta_x: float = 18
+    region_labels, mask_array, upper: bool, delta_x: float = 20
 ) -> tuple[ParamCurveLine, list]:
     """
     Determines and returns a sorted points based on global x and grouping based on local y.
@@ -125,7 +124,8 @@ def uniform_align_comp_cell(
     last_region_coords = np.where(masks == last_label)
     last_region_coords = get_formated_region_coords(last_region_coords)
     pc, _, _ = get_pcs(last_region_coords)
-    aligned_coords = rotate_region(pc, aligned_coords, upper)
+
+    aligned_coords = rotate_region(pc, last_region_coords, upper)
     if upper:
         min_y1 = np.min(aligned_coords[:, 1])
         aligned_coords[:, 1] -= int(min_y1)
@@ -133,6 +133,7 @@ def uniform_align_comp_cell(
         max_y1 = np.max(aligned_coords[:, 1])
         aligned_coords[:, 1] -= int(max_y1)
         aligned_coords[:, 1] = -aligned_coords[:, 1]
+
     aligned_coords[:, 0] += distance_shift
 
     for orig, rot in zip(last_region_coords, aligned_coords):
