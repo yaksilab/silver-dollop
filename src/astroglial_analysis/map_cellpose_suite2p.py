@@ -81,8 +81,8 @@ def map_trace(F, mapping):
         else:
             print(f"No Cellpose mask found for Suite2p ROI {s2p_label}")
 
-    if not mapped_traces:
-        print("No traces were mapped to any Cellpose labels.")
-        return np.array([])
+    # if not mapped_traces:
+    #     print("No traces were mapped to any Cellpose labels.")
+    #     return np.array([])
 
     return mapped_traces

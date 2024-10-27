@@ -112,13 +112,13 @@ def run_pipeline(working_directory, segment_length=10):
 
     mapping = create_suite2p_cellpose_roi_mapping(subsegmented_mask, suite2p_folder)
     reversed_mapping = {cp_label: s2p_idx for s2p_idx, cp_label in mapping.items()}
-    suite2p_column = np.array(
-        [reversed_mapping.get(label) for label in mapped_traces_matrix[:, 1]]
-    )
 
     traces = np.load(f"{suite2p_folder}/F.npy", allow_pickle=True)
     mapped_traces_matrix = map_trace(traces, mapping)
-    mapped_subsegmented_data = np.column_stack((suite2p_column, mapped_traces_matrix))
+    suite2p_column = np.array(
+        [reversed_mapping.get(label) for label in sub_segmented_data[:, 1]]
+    )
+    mapped_subsegmented_data = np.column_stack((suite2p_column, sub_segmented_data))
 
     npy_output_path_trace = os.path.join(working_directory, "trace_matrix.npy")
     mat_output_path_trace = os.path.join(working_directory, "trace_matrix.mat")
