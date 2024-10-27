@@ -43,19 +43,16 @@ def calculate_elongation_center_of_mass(masks):
         center = region.centroid
 
         minr, minc, maxr, maxc = region.bbox
-        geometric_center = ((minr + maxr) / 2, (minc + maxc) / 2)
+        geometric_center = ((minr + maxr) / 2, (minc + maxc) / 2)  # uses bounding box
         rect = cv2.minAreaRect(region.coords)
 
-        min_area_rec_center = rect[0]
-        # print("center", center, "cv2_center", cv2_center)
-
+        min_area_rec_center = rect[
+            0
+        ]  # center of the minimum area rectangle better normal bounding box.
         max_dist = np.linalg.norm([maxr - minr, maxc - minc]) / 2
+
         # relative shift
         center_shift = np.linalg.norm(np.array(center) - np.array(min_area_rec_center))
-        # plt.scatter(region.coords[:, 1], region.coords[:, 0], s=5)
-        # plt.scatter(center[1], center[0], c="red", s=15)
-        # plt.scatter(geometric_center[1], geometric_center[0], c="blue", s=15)
-        # plt.scatter(min_area_rec_center[1], min_area_rec_center[0], c="green", s=15)
 
         # Calculate the direction of the shift
         shift_direction = -np.array(min_area_rec_center) + np.array(center)
@@ -82,26 +79,26 @@ def calculate_elongation_center_of_mass(masks):
 def classify_masks(masks, body_size=200):
     classifications = []
     features = calculate_elongation_center_of_mass(masks)
-    mask_shape = masks.shape  # (y,x)
+    # mask_shape = masks.shape  # (y,x)
 
     body = []
     processes = []
     complete_cell = {"upper": [], "lower": []}
     means_upper = []
     means_lower = []
-
     process_means = []
     process_labels = []
 
+    # Define thresholds for classification
+    elongation_threshold = 0.85
+    elong_thresh = 0.98
+    shift_threshold = 2
+
     for elongation, center_shift, mask, shift_direction, region, cov in features:
-        # Define thresholds for classification
-        elongation_threshold = 0.85
-        elong_thresh = 0.98
-        shift_threshold = 2
+
         classification = None
         coords = region.coords  # This in (y,x) format
         coords = np.flip(coords, axis=1)  # This is now in (x,y) format
-        ab = get_ab(coords)
 
         if elongation < elongation_threshold:
             classification = 1
@@ -116,7 +113,7 @@ def classify_masks(masks, body_size=200):
             if (cov >= 0 and shift_direction[0] <= 0) or (
                 cov < 0 and shift_direction[0] < 0
             ):
-                center, bod = get_cellbody_center(coords, True, body_size)
+                _, bod = get_cellbody_center(coords, True, body_size)
                 elong = label_region(bod)
 
                 if elong.eccentricity > elong_thresh:

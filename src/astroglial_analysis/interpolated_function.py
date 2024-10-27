@@ -179,9 +179,9 @@ def uniform_align_processes(
     corresponding_matrix = []
     for label, (t, x, y), d in intersection_list:
         coords = get_formated_region_coords(np.where(masks == label))
-        mean = np.mean(coords, axis=0)
         pc, _, _ = get_pcs(coords)
         rotated_coords = rotate_region(pc, coords, upper)
+        mean = np.mean(rotated_coords, axis=0)
         translation = np.array([t, d]) - mean
         aligned_coords = rotated_coords + translation
 
@@ -190,6 +190,8 @@ def uniform_align_processes(
             aligned_coords[:, 1] -= min_y
 
         aligned_processes.append((label, aligned_coords))
+        if not upper:
+            aligned_coords = np.flip(aligned_coords, axis=0)
 
         for orig, rot in zip(coords, aligned_coords):
             row = np.array([label, orig[0], orig[1], rot[0], rot[1]])

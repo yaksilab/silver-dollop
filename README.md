@@ -4,14 +4,26 @@ This repo contains analysis tools for astroglial cells
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
-
+- [Overview](#overview)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Setup either via quick setup or local source code clone setup](#setup-either-via-quick-setup-or-local-source-code-clone-setup)
     - [Quick setup](#quick-setup)
     - [Local source code clone setup and package installation](#local-source-code-clone-setup-and-package-installation)
   - [Usage](#usage)
-- [Overview](#overview)
+
+
+# Overview
+![image](https://github.com/user-attachments/assets/ee8463f6-35a9-428c-a13b-e9ebfe2941b1)
+
+![alt text](assets/image.png)
+
+![alt text](assets/image-1.png)
+
+![alt text](assets/image-2.png)
+
+
+**You can check out the** [notebook](src/astroglial_analysis/notebook.ipynb) **for more details.**
 
 # Getting Started
 
@@ -87,6 +99,11 @@ Run the main script with the following command:
     ```sh
     python -m astroglial_analysis <path to your data folder>
     ```
+3. **Run with additional arguments:**
+
+    ```sh
+    python -m astroglial_analysis <path to your data folder> --segment_length 12
+    ```
 ### import the package in your python script or jupyter notebook:
 
 1. **Activate the environment:**
@@ -97,12 +114,10 @@ Run the main script with the following command:
 2. **Import the package:**
 
     ```python
-    from astroglial_analysis import main
+    from astroglial_analysis.run_pipline import run_pipeline
 
-    main('<path to your data folder>')
+    run_pipline('<path to your data folder>', segment_length=12)
     ```
-# Overview
-![image](https://github.com/user-attachments/assets/ee8463f6-35a9-428c-a13b-e9ebfe2941b1)
 
 
 
