@@ -46,6 +46,13 @@ def get_correspondence_matrix(masks):
     line_lower, _ = get_line(lower_complete, masks, False, 20)
     upper_points = np.array([point[0] for point in line_upper])
     lower_points = np.array([point[0] for point in line_lower])
+
+    if len(upper_points) < 3 or len(lower_points) < 3:
+        raise ValueError(
+            "Insufficitan number of points to create brain part line curve,\
+             make sure you have at least 4 complete cells extending from the brain part"
+        )
+
     t_upper, tck_upper, _, _, _ = parametrize_curve(upper_points)
     t_lower, tck_lower, _, _, _ = parametrize_curve(lower_points)
 
@@ -94,8 +101,11 @@ def run_pipeline(working_directory, segment_length=10):
     mask_file = np.load(combined_mean_image_seg_path, allow_pickle=True)
     new_maskfile = mask_file.copy()
     masks = mask_file.item()["masks"]
-
-    total_cor_matrix = get_correspondence_matrix(masks)
+    try:
+        total_cor_matrix = get_correspondence_matrix(masks)
+    except ValueError as e:
+        print(e)
+        return
 
     sub_segmented_data = sub_segment(total_cor_matrix, segment_length)
     subsegmented_mask = create_cp_mask(sub_segmented_data, masks)
