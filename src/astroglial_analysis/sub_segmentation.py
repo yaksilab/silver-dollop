@@ -88,13 +88,14 @@ def sub_segment(data_matrix, subsegment_length):
         ]
     )
 
-   
     new_data = np.column_stack(
         (
-            cell_labels,  
-            sub_segment_label,  
-            subsegment_number,  
-            data_matrix[:, 1:5],  # x_original, y_original, x_rotated, y_rotated
+            cell_labels,
+            sub_segment_label,
+            subsegment_number,
+            data_matrix[
+                :, 1:6
+            ],  # x_original, y_original, x_rotated, y_rotated, class label
         )
     )
 
