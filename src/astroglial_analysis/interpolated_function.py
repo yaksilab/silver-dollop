@@ -76,11 +76,19 @@ def find_intersections(tck, t_interval, a, b, tol=1e-2) -> list[Intersection]:
     # Defining the difference function f(t) = y(t) - (a * x(t) + b)
     total_length = t_interval[-1]
 
-    def f(t):
-        u = t / total_length  # Normalize t to [0, 1]
-        x = splev(u, spline_x)
-        y = splev(u, spline_y)
-        return y - (a * x + b)
+    if np.isinf(a):
+        # For vertical line x = b, find where x(t) - b = 0
+        def f(t):
+            u = t / total_length
+            x = splev(u, spline_x)
+            return x - b
+    else:
+        # For regular line y = ax + b, find where y(t) - (ax(t) + b) = 0
+        def f(t):
+            u = t / total_length
+            x = splev(u, spline_x)
+            y = splev(u, spline_y)
+            return y - (a * x + b)
 
     f_samples = f(t_interval)
 
