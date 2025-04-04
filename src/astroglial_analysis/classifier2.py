@@ -10,8 +10,13 @@ from astroglial_analysis.pca import get_pcs
 def get_ab(coords):
     pc, _, _ = get_pcs(coords)
     mean = np.mean(coords, axis=0)
-    a = pc[1] / pc[0]
-    b = mean[1] - a * mean[0]
+    if np.isclose(pc[0], 0):
+        a = float("inf")
+        b = mean[0]  # x = b equation for vertical line
+    else:
+        a = pc[1] / pc[0]
+        b = mean[1] - a * mean[0]
+
     return a, b, mean
 
 
@@ -41,6 +46,9 @@ def calculate_elongation_center_of_mass(masks):
     for region in regions:
         elongation = region.eccentricity
         center = region.centroid
+        coords = region.coords
+        if len(coords) < 3:
+            continue
 
         minr, minc, maxr, maxc = region.bbox
         geometric_center = ((minr + maxr) / 2, (minc + maxc) / 2)  # uses bounding box
@@ -56,10 +64,12 @@ def calculate_elongation_center_of_mass(masks):
 
         # Calculate the direction of the shift
         shift_direction = -np.array(min_area_rec_center) + np.array(center)
-        shift_direction_normalized = shift_direction / np.linalg.norm(shift_direction)
+        norm = np.linalg.norm(shift_direction)
+        shift_direction_normalized = (
+            shift_direction / norm if norm > 0 else np.array([0, 0])
+        )
 
         # Calculate covariance matrix
-        coords = region.coords
         covariance_matrix = np.cov(coords, rowvar=False)
         covariance = covariance_matrix[0][1]
         features.append(
