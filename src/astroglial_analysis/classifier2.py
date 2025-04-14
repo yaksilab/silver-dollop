@@ -2,9 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.measure import regionprops, label
 import cv2
-from .determine_line import get_cellbody_center
-from .my_types import Region
+from astroglial_analysis.determine_line import get_cellbody_center
+from astroglial_analysis.my_types import Region
 from astroglial_analysis.pca import get_pcs
+import warnings
 
 
 def get_ab(coords):
@@ -86,12 +87,59 @@ def calculate_elongation_center_of_mass(masks):
     return features
 
 
+def classify_masks_nn(masks, model_path, columns=None):
+    """
+    DEPRECATED: This function replaces classify_masks() with a neural network-based classifier.
+    Args:
+        masks (np.ndarray): Segmentation masks with labeled regions.
+        model_path (str): Path to the pretrained neural network (.pkl).
+        columns (list or None): Feature columns to use (optional).
+    Returns:
+        classifications (list of tuples): (predicted_class, region_label) for each region.
+        body (dict): {"upper": [...], "lower": [...]} for class 5
+        processes (dict): {"upper": [...], "lower": [...]} for classes 3, 4
+        complete_cell (dict): {"upper": [...], "lower": [...]} for classes 1, 2
+    """
+    warnings.warn(
+        "classify_masks_nn() replaces classify_masks() and uses a neural network. This function is experimental.",
+        DeprecationWarning,
+    )
+    from neural_network.utils import load_neural_network
+    from astroglial_analysis.utils import prepare_data_for_prediction
+    import numpy as np
+
+    features, cell_labels = prepare_data_for_prediction(masks, columns)
+    classifier = load_neural_network(model_path)
+    predicted_classes = classifier.predict_classes(features)
+    predicted_classes = predicted_classes + 1
+    classifications = [
+        (int(pred), int(label)) for pred, label in zip(predicted_classes, cell_labels)
+    ]
+
+    body = {"total": []}
+    processes = {"upper": [], "lower": []}
+    complete_cell = {"upper": [], "lower": []}
+    for pred, label in classifications:
+        if pred == 1:
+            complete_cell["upper"].append(label)
+        elif pred == 2:
+            complete_cell["lower"].append(label)
+        elif pred == 3:
+            processes["upper"].append(label)
+        elif pred == 4:
+            processes["lower"].append(label)
+        elif pred == 5:
+            body["total"].append(label)
+    return classifications, body, processes, complete_cell
+
+
 def classify_masks(masks, body_size=200):
     classifications = []
     features = calculate_elongation_center_of_mass(masks)
     # mask_shape = masks.shape  # (y,x)
 
     body = []
+    body_means = []  # New list to store body mean coordinates
     processes = []
     complete_cell = {"upper": [], "lower": []}
     means_upper = []
@@ -105,18 +153,17 @@ def classify_masks(masks, body_size=200):
     shift_threshold = 2
 
     for elongation, center_shift, mask, shift_direction, region, cov in features:
-
         classification = None
         coords = region.coords  # This in (y,x) format
-        coords = np.flip(coords, axis=1)  # This is now in (x,y) format
+        coords = np.flip(coords, axis=1)  # Now in (x,y) format
 
         if elongation < elongation_threshold:
             classification = 1
             body.append(region.label)
+            body_means.append(np.mean(coords, axis=0))  # Record mean for body
         elif center_shift < shift_threshold or region.area < 1.5 * body_size:
             classification = 2
             processes.append(region.label)
-
             process_means.append(np.mean(coords, axis=0))
             process_labels.append(region.label)
         else:
@@ -125,28 +172,23 @@ def classify_masks(masks, body_size=200):
             ):
                 _, bod = get_cellbody_center(coords, True, body_size)
                 elong = label_region(bod)
-
                 if elong.eccentricity > elong_thresh:
                     processes.append(region.label)
                     classification = 2
-
                     process_means.append(np.mean(coords, axis=0))
                     process_labels.append(region.label)
                 else:
                     classification = 3
                     complete_cell["upper"].append(region.label)
                     means_upper.append(np.mean(coords, axis=0))
-
             elif (cov < 0 and shift_direction[0] > 0) or (
                 cov > 0 and shift_direction[0] > 0
             ):
                 center, bod = get_cellbody_center(coords, False, body_size)
                 elong = label_region(bod)
-
                 if elong.eccentricity > elong_thresh:
                     processes.append(region.label)
                     classification = 2
-
                     process_means.append(np.mean(coords, axis=0))
                     process_labels.append(region.label)
                 else:
@@ -194,26 +236,20 @@ def classify_masks(masks, body_size=200):
     # Reclassify Processes into Upper and Lower
     processes_upper = []
     processes_lower = []
-
     if process_means:
-        # Calculate the overall total mean y-coordinate
         if means_upper and means_lower:
             mean_upper = np.mean(means_upper, axis=0)
             mean_lower = np.mean(means_lower, axis=0)
             total_mean = (mean_upper + mean_lower) / 2
             total_mean_y = total_mean[1]
         else:
-
             total_mean_y = np.mean([mean[1] for mean in process_means])
-
         for label, mean in zip(process_labels, process_means):
             if mean[1] > total_mean_y * 1.1:
                 processes_upper.append(label)
-
             elif mean[1] < total_mean_y * 0.9:
                 processes_lower.append(label)
             else:
-
                 if mean[1] >= total_mean_y:
                     processes_upper.append(label)
                 else:
@@ -223,19 +259,88 @@ def classify_masks(masks, body_size=200):
     complete_cell["processes_upper"] = processes_upper
     complete_cell["processes_lower"] = processes_lower
 
-    return classifications, body, processes, complete_cell
+    # New: Reclassify Body into Upper and Lower Groups
+    body_upper = []
+    body_lower = []
+    if body_means:
+        total_body_mean = (np.mean(body_means, axis=0) + total_mean) / 2
+        for label, mean in zip(body, body_means):
+            if mean[1] > total_body_mean[1]:
+                body_upper.append(label)
+            else:
+                body_lower.append(label)
+        # Replace body list with a dictionary classification
+        body = {"upper": body_upper, "lower": body_lower}
+
+        final_classifications = []
+    for label in complete_cell["upper"]:
+        final_classifications.append((1, label))
+    for label in complete_cell["lower"]:
+        final_classifications.append((2, label))
+    for label in processes["upper"]:
+        final_classifications.append((3, label))
+    for label in processes["lower"]:
+        final_classifications.append((4, label))
+    # Combine both upper and lower body parts with the same label 5
+    for label in body["upper"] + body["lower"]:
+        final_classifications.append((5, label))
+
+    return final_classifications, body, processes, complete_cell
+
+
+# DEPRECATED: Mark old function as deprecated but keep for backward compatibility
+
+import warnings
+
+old_classify_masks = classify_masks
+
+
+def classify_masks(*args, **kwargs):
+    warnings.warn(
+        "classify_masks() is deprecated. Use classify_masks_nn() instead.",
+        DeprecationWarning,
+    )
+    return old_classify_masks(*args, **kwargs)
 
 
 def visualize_classifications(masks, classifications):
 
     for classification, label in classifications:
         if classification == 1:
+            # complete cell upper
             color = "red"
         elif classification == 2:
+            # complete cell lower
             color = "blue"
-        else:
+        elif classification == 3:
+            # processes upper
             color = "green"
+        elif classification == 4:
+            # processes lower
+            color = "yellow"
+        elif classification == 5:
+            # body upper
+            color = "magenta"
+        elif classification == 6:
+            # body lower
+            color = "cyan"
+        else:
+            color = "red"
 
         region = np.where(masks == label)
         region = np.array(region).T
         plt.scatter(region[:, 1], region[:, 0], s=1, c=color)
+
+        # Calculate the center of the region
+        center_y, center_x = np.mean(region, axis=0)
+
+        # Add the label text at the center with black color
+        plt.text(
+            center_x,
+            center_y,
+            str(label),
+            color="black",
+            fontsize=6,
+            ha="center",
+            va="center",
+        )

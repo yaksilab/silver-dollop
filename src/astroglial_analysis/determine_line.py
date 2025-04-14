@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from .utils import get_formated_region_coords, rotate_region
 from .pca import get_pcs
 from .my_types import Region, ParamCurveLine, IDRegion
